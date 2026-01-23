@@ -1,0 +1,9 @@
+pyttsx3==2.99
+pyjokes==0.8.3
+requests==2.32.5
+python-dotenv==1.2.1
+newsapi-python==0.2.7
+SpeechRecognition==3.14.3
+PyAudio==0.2.14
+pywhatkit==5.4
+psutil==7.2.1
