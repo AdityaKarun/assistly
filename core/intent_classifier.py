@@ -13,6 +13,7 @@ ALLOWED_INTENTS = {
     "opening_app_or_url",
     "system_info",
     "timer",
+    "courtesy",
     "exit",
     "unknown"
 }
@@ -132,10 +133,32 @@ class IntentEngine:
             If duration exceeds 3600 seconds, still classify as timer but keep duration at 3600 (max limit).
             If no duration is specified, use confidence 0.6-0.7 and omit duration entity.
 
-            11. "exit" - User wants to quit, stop, or exit the application
+            11. "courtesy" - User expresses gratitude, thanks, or polite acknowledgment
+            
+            This intent captures polite expressions where the user is thanking the assistant
+            or acknowledging its help. These are NOT commands or requests for action.
+            
+            Examples:
+            "thank you" → courtesy
+            "thanks" → courtesy
+            "thanks a lot" → courtesy
+            "appreciate it" → courtesy
+            "thank you so much" → courtesy
+            "thanks man" → courtesy
+            "cheers" → courtesy
+            
+            IMPORTANT DISTINCTIONS:
+            - "thank you" → courtesy (just expressing gratitude)
+            - "can you help me" → unknown or search (asking for help, not thanking)
+            - "thanks, now search for X" → search (the thanks is incidental to the command)
+            
+            When classified as courtesy, no entities are needed.
+            Confidence should be high (0.9+) for clear expressions of thanks.
+
+            12. "exit" - User wants to quit, stop, or exit the application
             Examples: "exit", "quit", "stop", "close", "shutdown"
 
-            12. "unknown" - Input doesn't match any category above, is gibberish, empty, or unclear
+            13. "unknown" - Input doesn't match any category above, is gibberish, empty, or unclear
             Examples: "loxacvreb", "asdfgh", "", "what is love"
 
             ===== ENTITY EXTRACTION RULES =====
@@ -230,7 +253,7 @@ class IntentEngine:
               - Browser/desktop software → app
               - Online services/social media → url
 
-            DO NOT extract entities for joke, exit, or unknown intents.
+            DO NOT extract entities for joke, courtesy, exit, or unknown intents.
             DO NOT invent entities that aren't in the user input.
 
             ===== CONFIDENCE SCORING RULES =====
@@ -241,16 +264,19 @@ class IntentEngine:
             - "open chrome browser" (clear app intent)
             - "check battery level" (clear system_info intent)
             - "set timer for 5 minutes" (clear timer with duration)
+            - "thank you" (clear courtesy expression)
 
             0.85-0.94: Clear intent with some details
             - "play a song on YouTube" (clear intent, generic query)
             - "open facebook" (clear but could be app or url)
             - "what's my cpu" (clear intent, inferred resource)
             - "timer for 30 seconds" (clear timer intent)
+            - "thanks a lot" (clear courtesy with emphasis)
 
             0.70-0.84: Clear intent, no details
             - "what's the news" (clear intent)
             - "tell me a joke" (clear intent)
+            - "cheers" (courtesy, less formal)
 
             0.50-0.69: Ambiguous, could match multiple intents
             - "what's happening" (could be news or general search)
@@ -270,13 +296,13 @@ class IntentEngine:
 
             REQUIRED FORMAT:
             {{
-            "intent": "one_of_the_12_intents_above",
+            "intent": "one_of_the_13_intents_above",
             "entities": {{}},
             "confidence": 0.85
             }}
 
             ===== STRICT RULES =====
-            1. Intent MUST be one of: date_time, joke, location, news, weather, search, youtube, opening_app_or_url, system_info, timer, exit, unknown
+            1. Intent MUST be one of: date_time, joke, location, news, weather, search, youtube, opening_app_or_url, system_info, timer, courtesy, exit, unknown
             2. DO NOT create new intent names
             3. DO NOT add explanations or comments
             4. DO NOT use markdown code blocks (no ```json or ```)
@@ -292,6 +318,7 @@ class IntentEngine:
             14. For system_info: ALWAYS include "resource" field (one of: battery, cpu, memory, storage, uptime)
             15. For timer: ALWAYS include "duration" field as INTEGER in SECONDS (after conversion from minutes/hours)
             16. For timer: YOU MUST do the math conversion (e.g., 5 minutes → 300, not "5 minutes")
+            17. For courtesy: NO entities needed, just high confidence for clear expressions of thanks
 
             ===== EXAMPLES =====
             Input: "what's the weather in Mumbai"
@@ -338,6 +365,21 @@ class IntentEngine:
 
             Input: "remind me in 1 hour"
             Output: {{"intent": "timer", "entities": {{"duration": 3600}}, "confidence": 0.88}}
+
+            Input: "thank you"
+            Output: {{"intent": "courtesy", "entities": {{}}, "confidence": 0.98}}
+
+            Input: "thanks a lot"
+            Output: {{"intent": "courtesy", "entities": {{}}, "confidence": 0.95}}
+
+            Input: "appreciate it"
+            Output: {{"intent": "courtesy", "entities": {{}}, "confidence": 0.93}}
+
+            Input: "thanks for your help"
+            Output: {{"intent": "courtesy", "entities": {{}}, "confidence": 0.96}}
+
+            Input: "cheers"
+            Output: {{"intent": "courtesy", "entities": {{}}, "confidence": 0.85}}
 
             Input: "go to imdb"
             Output: {{"intent": "opening_app_or_url", "entities": {{"type": "url", "name": "imdb", "url": "https://imdb.com"}}, "confidence": 0.91}}
@@ -401,7 +443,7 @@ class IntentEngine:
 if __name__ == "__main__":
     user_intent = IntentEngine()
     user_command = input("Enter the command: ")
-    intent_result = user_intent.classify(user_command=user_command)
+    intent_result = user_intent.classify(user_command)
     intent, entities, confidence = intent_result[0], intent_result[1], intent_result[2]
 
     print(f"Intent: {intent}")

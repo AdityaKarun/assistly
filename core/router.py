@@ -10,6 +10,7 @@ from modules.youtube_player import youtube_player
 from modules.open_app_or_url import open_app_or_url
 from modules.system_info import handle_system_info
 from modules.timer import run_timer
+from modules.courtesy_handler import handle_courtesy
 
 class Router:
     def __init__(self, speaker=None):
@@ -77,6 +78,9 @@ class Router:
         if intent == "timer":
             # Speaker is passed for real-time feedback during countdown
             return run_timer(entities, self.speaker)
+        
+        if intent == "courtesy":
+            return handle_courtesy()
 
         if intent == "exit":
             response = "Goodbye"
