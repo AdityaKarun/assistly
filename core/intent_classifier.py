@@ -53,7 +53,27 @@ class IntentEngine:
             You must classify the input into EXACTLY ONE of these intents:
 
             1. "date_time" - User asks about current time, date, day, or calendar information
-            Examples: "what time is it", "what's the date", "what day is today"
+            
+            The user may ask for specific information or all information:
+            - Time only: "what time is it", "tell me the time", "current time"
+            - Date only: "what's the date", "what's today's date", "tell me the date"
+            - Day only: "what day is it", "what day is today", "which day"
+            - Multiple/All: "what's the time and date", "tell me everything", "date and time"
+            
+            Extract which information type(s) the user wants:
+            - If asking ONLY for time → extract "time"
+            - If asking ONLY for date → extract "date"
+            - If asking ONLY for day → extract "day"
+            - If asking for multiple or unclear → extract all that apply or default to all three
+            
+            Examples:
+            "what time is it" → date_time with info_type: ["time"]
+            "what's the date" → date_time with info_type: ["date"]
+            "what day is today" → date_time with info_type: ["day"]
+            "what's the time and date" → date_time with info_type: ["time", "date"]
+            "tell me the date and day" → date_time with info_type: ["date", "day"]
+            "what's today" → date_time with info_type: ["date", "day"]
+            "time and date please" → date_time with info_type: ["time", "date"]
 
             2. "joke" - User requests a joke or something funny
             Examples: "tell me a joke", "say something funny", "make me laugh"
@@ -164,15 +184,41 @@ class IntentEngine:
             ===== ENTITY EXTRACTION RULES =====
             Extract ONLY these entity types if present and relevant to the intent:
 
+            - FOR "date_time" INTENT:
+              {{"info_type": ["time", "date", "day"]}}
+              
+              Analyze what the user is asking for and include ONLY the relevant types:
+              - "time" → when asking about current time, hours, minutes, AM/PM
+              - "date" → when asking about the date, month, year, today's date
+              - "day" → when asking about the day of the week (Monday, Tuesday, etc.)
+              
+              Rules:
+              - If user asks ONLY for time → ["time"]
+              - If user asks ONLY for date → ["date"]
+              - If user asks ONLY for day → ["day"]
+              - If user asks for "date and time" → ["time", "date"]
+              - If user asks for "day and date" → ["date", "day"]
+              - If user asks "what's today" or similar ambiguous queries → ["date", "day"]
+              - If completely unclear what they want → ["time", "date", "day"] (all)
+              
+              Examples:
+              "what time is it" → {{"info_type": ["time"]}}
+              "tell me the time" → {{"info_type": ["time"]}}
+              "what's the date today" → {{"info_type": ["date"]}}
+              "what day is it" → {{"info_type": ["day"]}}
+              "what day is today" → {{"info_type": ["day"]}}
+              "time and date" → {{"info_type": ["time", "date"]}}
+              "what's today" → {{"info_type": ["date", "day"]}}
+              "tell me date and day" → {{"info_type": ["date", "day"]}}
+              "what's the current time and date" → {{"info_type": ["time", "date"]}}
+              "give me all time info" → {{"info_type": ["time", "date", "day"]}}
+
             - "location": City, country, place name (for weather, location intents)
             Example: "weather in Mumbai" → {{"location": "Mumbai"}}
 
             - "query": Search terms, song names, video titles (for search, youtube intents)
             Example: "search for python" → {{"query": "python"}}
             Example: "play despacito" → {{"query": "despacito"}}
-
-            - "date": Specific date mentioned (for date_time intent)
-            Example: "what day is December 25" → {{"date": "December 25"}}
 
             - FOR "system_info" INTENT:
               {{"resource": "resource_type"}}
@@ -265,6 +311,7 @@ class IntentEngine:
             - "check battery level" (clear system_info intent)
             - "set timer for 5 minutes" (clear timer with duration)
             - "thank you" (clear courtesy expression)
+            - "what time is it" (clear date_time with specific info_type)
 
             0.85-0.94: Clear intent with some details
             - "play a song on YouTube" (clear intent, generic query)
@@ -272,11 +319,13 @@ class IntentEngine:
             - "what's my cpu" (clear intent, inferred resource)
             - "timer for 30 seconds" (clear timer intent)
             - "thanks a lot" (clear courtesy with emphasis)
+            - "what's the date" (clear date_time with specific info_type)
 
             0.70-0.84: Clear intent, no details
             - "what's the news" (clear intent)
             - "tell me a joke" (clear intent)
             - "cheers" (courtesy, less formal)
+            - "what's today" (date_time but ambiguous info_type)
 
             0.50-0.69: Ambiguous, could match multiple intents
             - "what's happening" (could be news or general search)
@@ -319,6 +368,8 @@ class IntentEngine:
             15. For timer: ALWAYS include "duration" field as INTEGER in SECONDS (after conversion from minutes/hours)
             16. For timer: YOU MUST do the math conversion (e.g., 5 minutes → 300, not "5 minutes")
             17. For courtesy: NO entities needed, just high confidence for clear expressions of thanks
+            18. For date_time: ALWAYS include "info_type" field as an ARRAY of strings (["time"], ["date"], ["day"], or combinations)
+            19. For date_time: Analyze the user's query carefully to extract ONLY what they're asking for
 
             ===== EXAMPLES =====
             Input: "what's the weather in Mumbai"
@@ -389,6 +440,27 @@ class IntentEngine:
 
             Input: "open terminal"
             Output: {{"intent": "opening_app_or_url", "entities": {{"type": "app", "name": "terminal", "executable": "cmd"}}, "confidence": 0.93}}
+
+            Input: "what time is it"
+            Output: {{"intent": "date_time", "entities": {{"info_type": ["time"]}}, "confidence": 0.98}}
+
+            Input: "what's the date"
+            Output: {{"intent": "date_time", "entities": {{"info_type": ["date"]}}, "confidence": 0.97}}
+
+            Input: "what day is today"
+            Output: {{"intent": "date_time", "entities": {{"info_type": ["day"]}}, "confidence": 0.96}}
+
+            Input: "what's the time and date"
+            Output: {{"intent": "date_time", "entities": {{"info_type": ["time", "date"]}}, "confidence": 0.95}}
+
+            Input: "tell me the date and day"
+            Output: {{"intent": "date_time", "entities": {{"info_type": ["date", "day"]}}, "confidence": 0.94}}
+
+            Input: "what's today"
+            Output: {{"intent": "date_time", "entities": {{"info_type": ["date", "day"]}}, "confidence": 0.85}}
+
+            Input: "give me all the time info"
+            Output: {{"intent": "date_time", "entities": {{"info_type": ["time", "date", "day"]}}, "confidence": 0.78}}
 
             Input: "loxacvreb"
             Output: {{"intent": "unknown", "entities": {{}}, "confidence": 0.15}}

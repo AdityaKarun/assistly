@@ -43,8 +43,7 @@ class Router:
             return response
         
         if intent == "date_time":
-            current_time, date, day = get_date_time()
-            response = (f"Its {current_time}, {day}, {date}")
+            response = get_date_time(entities)
             return response
         
         if intent == "joke":
