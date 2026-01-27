@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from modules.date_and_time import get_date_time
-
 def greet():
     """
     Generates a greeting based on the current time of day.
@@ -12,7 +10,7 @@ def greet():
     Returns:
         str: Greeting message appropriate for the current time.
     """
-    current_time, _, _ = get_date_time()
+    current_time = datetime.now().strftime("%I:%M %p")
     hour = datetime.strptime(current_time, "%I:%M %p").hour
 
     # Time-of-day based greeting selection
