@@ -46,4 +46,8 @@ def setup_logging():
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
 
+    # Silence noisy third-party libraries
+    logging.getLogger("comtypes").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+
     root_logger.debug("Logging initialized")
