@@ -1,6 +1,9 @@
+import logging
 import json
 
 from core.llm_client import GeminiClient
+
+logger = logging.getLogger(__name__)
 
 ALLOWED_INTENTS = {
     "date_time",
@@ -30,6 +33,7 @@ class IntentEngine:
             None
         """
         self.llm = GeminiClient()
+        logger.debug("Intent Engine initialized")
 
     def classify(self, user_command):
         """
@@ -473,28 +477,58 @@ class IntentEngine:
 
             Now classify this input: "{user_command}"
         """
+        # Send the constructed prompt to the LLM for intent classification
+        raw_data = self.llm.generate(prompt)
 
-        raw_data = self.llm.generate(prompt=prompt)
-
-         # Treat missing or empty LLM responses as unknown intent
+        # Treat missing or None LLM responses and fall back safely
         if not raw_data:
+            logger.warning("LLM response is missing or empty, falling back to default (unknown) intent result")
             return "unknown", {}, 0.0
+        
+        raw_data = raw_data.strip()
+        if raw_data.startswith("```"):
+            lines = raw_data.splitlines()
+
+            # Drop opening fence (``` or ```json)
+            lines = lines[1:]
+
+            # Remove closing code fence if present
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+
+            raw_data = "\n".join(lines).strip()
 
         try:
             # LLM output must be valid JSON to proceed
             data = json.loads(raw_data.strip())
-        except Exception as e:
-            # Any parsing failure is considered an unsafe response
-            print(f"Failed to parse LLM response: {e}")
+            logger.debug("Parsed LLM JSON output: %s", data)
+
+
+        except json.JSONDecodeError:
+            logger.warning("Invalid JSON from LLM, falling back to default (unknown) intent result")
+            logger.debug("Raw LLM output: %s", raw_data)
             return "unknown", {}, 0.0
 
+        except Exception:
+            # Any parsing failure is considered an unsafe response
+            logger.exception("Failed to parse LLM response, falling back to default (unknown) intent result")
+            logger.debug("Raw LLM output: %s", raw_data)
+            return "unknown", {}, 0.0
+
+        # Non-dict responses are treated as invalid model behavior
+        if not isinstance(data, dict):
+            logger.warning("LLM output is not a JSON object, falling back to default (unknown) intent result")
+            return "unknown", {}, 0.0
+        
+        # Extract expected fields with defensive defaults
         intent = data.get("intent", "unknown")
         confidence = data.get("confidence", 0.0)
         entities = data.get("entities", {})
 
         # Enforce intent whitelist to prevent hallucinated labels
         if intent not in ALLOWED_INTENTS:
-            intent = "unknown"
+            logger.warning("Intent is not matching any allowed intent, falling back to default (unknown) intent result")
+            return "unknown", {}, 0.0
 
         # Ensure entities is always a dictionary for downstream safety
         if not isinstance(entities, dict):
@@ -505,19 +539,19 @@ class IntentEngine:
             confidence = float(confidence)
             confidence = max(0.0, min(1.0, confidence))
         except Exception:
+            logger.debug("Invalid confidence value from LLM: %s", data.get("confidence"))
             confidence = 0.0
 
         intent_result = intent, entities, confidence
-        print(intent_result)
+        logger.info("Intent classified | %s", intent_result)
         return intent_result
     
 
 if __name__ == "__main__":
+    from core.logger_config import setup_logging
+
+    setup_logging()
     user_intent = IntentEngine()
+
     user_command = input("Enter the command: ")
     intent_result = user_intent.classify(user_command)
-    intent, entities, confidence = intent_result[0], intent_result[1], intent_result[2]
-
-    print(f"Intent: {intent}")
-    print(f"Entities: {entities}")
-    print(f"Confidence: {confidence}")

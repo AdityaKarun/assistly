@@ -1,9 +1,12 @@
+import logging
 import os
 import requests
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 class GeminiClient:
     def __init__(self, model="gemini-2.5-flash", timeout=10):
@@ -23,6 +26,12 @@ class GeminiClient:
         self.url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
         )
+        logger.debug(
+            "GeminiClient initialized | Model=%s Timeout=%s URL=%s",
+            self.model,
+            self.timeout,
+            self.url
+        )
 
     def generate(self, prompt):
         """
@@ -32,10 +41,11 @@ class GeminiClient:
             prompt (str): Prompt text to be sent to the LLM.
 
         Returns:
-            str: Generated text response, or empty string on failure.
+            str | None: Generated text response, or None on failure.
         """
         if not self.api_key:
-            print("GEMINI_API_KEY not found in environment variables.")
+            logger.warning("GEMINI_API_KEY not found in environment variables")
+            return None
         
         headers = {
             "Content-Type": "application/json"
@@ -61,23 +71,51 @@ class GeminiClient:
                 json=payload,
                 timeout=self.timeout
             )
+            logger.debug(
+                "API request made to Gemini | URL=%s Headers=%s Parameter= API Key Hidden Payload=%s Timeout=%s",
+                self.url, headers, payload, self.timeout
+            )
+
+            logger.debug(
+                "API response from Gemini | Status=%s Headers=%s",
+                response.status_code,
+                response.headers
+            )
 
             # Raises exception for non-2xx responses
             response.raise_for_status()
 
+            # Decode JSON response from Gemini into Python objects
             data = response.json()
+            logger.debug("Parsed JSON response from Gemini: %s", data)
 
             # Safely extract nested text without assuming response shape
-            return data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+            result = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+            logger.debug("Gemini generated text: %s", result)
 
-        except Exception as e:
-            # Network, timeout, or API errors are handled gracefully
-            print(f"API call to the LLM failed: {str(e)}")
-            return ""
+            return result
+
+        except requests.RequestException as e:
+            # Network issues, timeouts, or non-2xx HTTP responses
+            logger.warning("HTTP/network error calling Gemini API: %s", e)
+            return None
+
+        except ValueError as e:
+            # Response body was not valid JSON
+            logger.warning("Failed to decode JSON response from Gemini: %s", e)
+            return None
+
+        except Exception:
+            # Unexpected programming or runtime error
+            logger.exception("Unexpected error in GeminiClient")
+            return None
         
 
 if __name__ == "__main__":
+    from core.logger_config import setup_logging
+
+    setup_logging()
     client = GeminiClient()
+
     prompt = input("Enter a prompt: ")
-    result = client.generate(prompt=prompt)
-    print(result)
+    client.generate(prompt=prompt)
