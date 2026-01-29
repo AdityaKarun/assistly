@@ -39,7 +39,7 @@ def setup_logging():
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
 
-    console_formatter = logging.Formatter("%(levelname)s | %(message)s")
+    console_formatter = logging.Formatter("%(message)s")
     console_handler.setFormatter(console_formatter)
 
     # Attach handlers
