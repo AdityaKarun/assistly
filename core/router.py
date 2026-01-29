@@ -63,23 +63,29 @@ class Router:
             return response
 
         if intent == "search":
-            return search_google(entities)
+            response = search_google(entities)
+            return response
         
         if intent == "youtube":
-            return youtube_player(entities)
+            response = youtube_player(entities)
+            return response
         
         if intent == "opening_app_or_url":
-            return open_app_or_url(entities)
+            response = open_app_or_url(entities)
+            return response
         
         if intent == "system_info":
-            return handle_system_info(entities)
+            response = handle_system_info(entities)
+            return response
         
         if intent == "timer":
             # Speaker is passed for real-time feedback during countdown
-            return run_timer(entities, self.speaker)
+            response = run_timer(entities, self.speaker)
+            return response
         
         if intent == "courtesy":
-            return handle_courtesy()
+            response = handle_courtesy()
+            return response
 
         if intent == "exit":
             response = "Goodbye"
@@ -91,12 +97,10 @@ class Router:
         
 
 if __name__ == "__main__":
-    intent = input("Enter Intent: ")
-    entities = input("Enter Entities: ")
-    confidence = float(input("Enter Confidence (Range 0-1): "))
-
-    intent_result = intent, entities, confidence
+    import ast
+    raw_input = input("Enter intent result: ")
+    intent_result = ast.literal_eval(raw_input)
 
     route = Router()
-    functionality = route.define_route(intent_result=intent_result)
+    functionality = route.define_route(intent_result)
     print(functionality)
