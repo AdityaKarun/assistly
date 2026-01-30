@@ -46,8 +46,8 @@ class Router:
 
         # Reject low-confidence intents to avoid incorrect actions
         if confidence < CONFIDENCE_THRESHOLD:
-            logger.debug(
-                "Low confidence intent, no module invoked | confidence=%.2f threshold=%.2f",
+            logger.warning(
+                "Low confidence intent, no module invoked | confidence=%s threshold=%s",
                 confidence,
                 CONFIDENCE_THRESHOLD
             )
@@ -121,7 +121,7 @@ class Router:
             response = self.fallback
             return response
         
-        logger.debug("Unhandled intent value, falling back | intent=%s", intent)
+        logger.warning("Unknown intent, no module invoked | intent=%s", intent)
         return self.fallback
         
 
