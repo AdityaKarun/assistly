@@ -25,8 +25,8 @@ if __name__ == "__main__":
 
         print(command)
 
-        intent_result = intent.classify(user_command=command)
-        response = route.define_route(intent_result=intent_result)
+        intent_result = intent.classify(command)
+        response = route.define_route(intent_result)
 
         speaker.speak(response)
 
