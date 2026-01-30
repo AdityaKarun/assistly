@@ -72,8 +72,10 @@ class GeminiClient:
                 timeout=self.timeout
             )
             logger.debug(
-                "API request made to Gemini | URL=%s Headers=%s Parameter= API Key Hidden Payload=%s Timeout=%s",
-                self.url, headers, payload, self.timeout
+                "API request to Gemini | URL=%s Headers=%s Timeout=%s",
+                self.url,
+                headers,
+                self.timeout
             )
 
             logger.debug(
