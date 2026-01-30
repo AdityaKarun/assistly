@@ -1,11 +1,17 @@
+import logging
+
 from core.recognizer import Recognizer
 from core.speech import Speech
 from core.intent_classifier import IntentEngine
 from core.router import Router
+from core.logger_config import setup_logging
 
 from modules.greet import greet
 
-if __name__ == "__main__":
+logger = logging.getLogger(__name__)
+
+def main():
+    logger.info("Assistly started")
     greeting = greet()
 
     recognizer = Recognizer()
@@ -20,10 +26,7 @@ if __name__ == "__main__":
 
         # Skip processing if speech recognition failed
         if not command:
-            print("Sorry, didn't catch that.")
             continue
-
-        print(command)
 
         intent_result = intent.classify(command)
         response = route.define_route(intent_result)
@@ -33,3 +36,10 @@ if __name__ == "__main__":
         # Exit loop when explicit termination intent is returned
         if response == "Goodbye":
             break
+    
+    logger.info("Assistly stopped")
+
+
+if __name__ == "__main__":
+    setup_logging()
+    main()
