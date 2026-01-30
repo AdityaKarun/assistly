@@ -23,9 +23,8 @@ class GeminiClient:
         self.api_key = os.getenv("GEMINI_API_KEY")
         self.model = model
         self.timeout = timeout
-        self.url = (
-            f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
-        )
+        self.url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+        
         logger.debug(
             "GeminiClient initialized | Model=%s Timeout=%s URL=%s",
             self.model,
