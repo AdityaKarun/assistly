@@ -180,10 +180,10 @@ class IntentEngine:
             Confidence should be high (0.9+) for clear expressions of thanks.
 
             12. "exit" - User wants to quit, stop, or exit the application
-            Examples: "exit", "quit", "stop", "close", "shutdown"
+            Examples: "exit", "quit", "stop", "close", "shutdown", "go to sleep"
 
             13. "unknown" - Input doesn't match any category above, is gibberish, empty, or unclear
-            Examples: "loxacvreb", "asdfgh", "", "what is love"
+            Examples: "loxacvreb", "asdfgh", "", "c2mionjoec"
 
             ===== ENTITY EXTRACTION RULES =====
             Extract ONLY these entity types if present and relevant to the intent:
