@@ -78,9 +78,8 @@ class GeminiClient:
             )
 
             logger.debug(
-                "API response from Gemini | Status=%s Headers=%s",
+                "API response from Gemini | Status=%s",
                 response.status_code,
-                response.headers
             )
 
             # Raises exception for non-2xx responses
