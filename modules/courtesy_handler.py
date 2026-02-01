@@ -1,11 +1,13 @@
+import logging
 import random
+
+logger = logging.getLogger(__name__)
 
 # Predefined short acknowledgements for courtesy-style responses
 RESPONSES = [
     "You're welcome.",
     "No problem.",
-    "Anytime.",
-    "All good."
+    "Anytime."
 ]
 
 def handle_courtesy():
@@ -18,10 +20,13 @@ def handle_courtesy():
     Returns:
         str: A randomly selected courtesy response.
     """
-    return random.choice(RESPONSES)
+    response = random.choice(RESPONSES)
+    logger.debug("Courtesy response generated successfully: %s", response)
+    return response
 
 
 if __name__ == "__main__":
-    input("Hit Enter to get a courtesy response.")
-    response = handle_courtesy()
-    print(response)
+    from core.logger_config import setup_logging
+
+    setup_logging()
+    handle_courtesy()
