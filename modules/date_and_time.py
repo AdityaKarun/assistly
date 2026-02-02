@@ -1,4 +1,7 @@
+import logging
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 def get_date_time(payload):
     """
@@ -9,11 +12,19 @@ def get_date_time(payload):
                         such as ["time", "date", "day"].
 
     Returns:
-        str: A formatted sentence describing the requested date/time details.
+        str: A formatted sentence describing the requested date/time details,
+             or a fallback message if the request is invalid.
     """
 
-    # Default to all supported values if nothing specific is requested
+    logger.debug("Payload received: %s", payload)
+
+    # Extract requested info types, defaulting later if empty or missing    
     requested_info = payload.get("info_type", ["time", "date", "day"])
+    logger.debug("Requested information: %s", requested_info)
+
+    if not requested_info:
+        requested_info = ["time", "date", "day"]
+        logger.warning("Requested information list empty, falling back to default %s", requested_info)
 
     now = datetime.now()
 
@@ -39,22 +50,36 @@ def get_date_time(payload):
             elif info == "day":
                 response.append(f"The day is {value}")
 
+        else:
+            logger.warning("Unknown info_type requested: %s", info)
+
+    logger.debug("Built response list: %s", response)
+
     # Handle cases where no valid request types were provided
     if len(response) == 0:
-        return "I couldn't determine what date/time information you need."
+        result = "I couldn't determine what date/time information you need."
+        logger.warning("Unable to process date/time information")
+        return result
     
     # Join fragments into a grammatically correct sentence
     elif len(response) == 1:
-        return response[0] + "."
+        result = response[0] + "."
     
     elif len(response) == 2:
-        return response[0] + " and " + response[1] + "."
+        result = response[0] + " and " + response[1] + "."
     
     else:
-        return response[0] + ", " + response[1] + " and " + response[2] + "."
+        result = response[0] + ", " + response[1] + " and " + response[2] + "."
+
+    logger.debug("Generated date/time response successfully | %s", result)
+    return result
 
 
 if __name__ == "__main__":
+    from core.logger_config import setup_logging
+
+    setup_logging()
+
     no_of_items = int(input("Enter the number of items to be requested: "))
     requested_info = []
 
@@ -63,5 +88,4 @@ if __name__ == "__main__":
         requested_info.append(info)
 
     payload = {"info_type": requested_info}
-    response = get_date_time(payload)
-    print(response)
+    get_date_time(payload)
