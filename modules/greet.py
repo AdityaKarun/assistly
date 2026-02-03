@@ -1,4 +1,7 @@
+import logging
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 def greet():
     """
@@ -10,8 +13,7 @@ def greet():
     Returns:
         str: Greeting message appropriate for the current time.
     """
-    current_time = datetime.now().strftime("%I:%M %p")
-    hour = datetime.strptime(current_time, "%I:%M %p").hour
+    hour = hour = datetime.now().hour
 
     # Time-of-day based greeting selection
     if hour >= 5 and hour < 12:
@@ -21,9 +23,12 @@ def greet():
     else:
         greeting = "Good Evening"
 
+    logger.debug("Greetings generated successfully: %s", greeting)
     return greeting
 
 
 if __name__ == "__main__":
-    greeting = greet()
-    print(f"{greeting}")
+    from core.logger_config import setup_logging
+
+    setup_logging()
+    greet()
