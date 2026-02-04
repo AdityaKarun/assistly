@@ -1,4 +1,7 @@
+import logging
 import pyjokes
+
+logger = logging.getLogger(__name__)
 
 def get_joke():
     """
@@ -11,10 +14,13 @@ def get_joke():
         str: A randomly selected programming joke.
     """
     joke = pyjokes.get_joke(language="en")
-    
+    logger.debug("Programming joke generated successfully: %s", joke)
+
     return joke
 
 
 if __name__ == "__main__":
-    joke = get_joke()
-    print(joke)
+    from core.logger_config import setup_logging
+
+    setup_logging()
+    get_joke()
