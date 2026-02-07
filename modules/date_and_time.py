@@ -57,19 +57,19 @@ def get_date_time(payload):
 
     # Handle cases where no valid request types were provided
     if len(response) == 0:
-        result = "I couldn't determine what date/time information you need."
+        result = "I couldn't determine what date/time information you need"
         logger.warning("Unable to process date/time information")
         return result
     
     # Join fragments into a grammatically correct sentence
     elif len(response) == 1:
-        result = response[0] + "."
+        result = response[0]
     
     elif len(response) == 2:
-        result = response[0] + " and " + response[1] + "."
+        result = response[0] + " and " + response[1]
     
     else:
-        result = response[0] + ", " + response[1] + " and " + response[2] + "."
+        result = response[0] + ", " + response[1] + " and " + response[2]
 
     logger.debug("Generated date/time response successfully | %s", result)
     return result
