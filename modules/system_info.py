@@ -1,6 +1,9 @@
+import logging
 import time
 import sys
 import psutil
+
+logger = logging.getLogger(__name__)
 
 def get_battery_status():
     """
@@ -10,24 +13,29 @@ def get_battery_status():
         None
 
     Returns:
-        str: Human-readable battery status message.
+        str: Human-readable battery status message or error message on failure.
     """
     try:
         battery = psutil.sensors_battery()
     except Exception:
-        return "I could not access battery information."
+        logger.exception("Failed to access battery information")
+        return "Could not access battery information"
     
     # Some systems do not expose battery data
     if battery is None:
-        return "Battery information is unavailable."
+        logger.warning("Battery information unavailable on this system")
+        return "Battery information is unavailable"
     
     percent = battery.percent
     plugged = battery.power_plugged
 
     if plugged:
-        return f"Battery is {percent}% and currently charging."
+        result = f"Battery is {percent}% and currently charging"
     else:
-        return f"Battery is {percent}%."
+        result = f"Battery is {percent}%"
+    
+    logger.debug("Battery status generated | percent=%s plugged=%s", percent, plugged)
+    return result
     
 def get_cpu_usage():
     """
@@ -37,14 +45,18 @@ def get_cpu_usage():
         None
 
     Returns:
-        str: Human-readable CPU usage message.
+        str: Human-readable CPU usage message or error message on failure.
     """
     try:
         usage = psutil.cpu_percent(interval=1)
     except Exception:
-        return "I could not retrieve CPU usage."
+        logger.exception("Failed to retrieve CPU usage")
+        return "Could not retrieve CPU usage"
 
-    return f"Current CPU usage is {usage}%."
+    result = f"Current CPU usage is {usage}%"
+
+    logger.debug("CPU usage generated | usage=%s", usage)
+    return result
 
 def get_ram_status():
     """
@@ -54,17 +66,21 @@ def get_ram_status():
         None
 
     Returns:
-        str: Human-readable RAM usage message.
+        str: Human-readable RAM usage message or error message on failure.
     """
     try:
         mem = psutil.virtual_memory()
     except Exception:
-        return "I could not retrieve memory information."
+        logger.exception("Failed to retrieve memory information")
+        return "Could not retrieve memory information"
     
     total = mem.total / (1024 ** 3)
     available = mem.available / (1024 ** 3)
 
-    return f"Out of {total:.1f} gigabytes, {available:.1f} gigabytes of RAM is currently free."
+    result = f"Out of {total:.1f} gigabytes, {available:.1f} gigabytes of RAM is currently free"
+
+    logger.debug("RAM status generated | total_gb=%.1f available_gb=%.1f", total, available)
+    return result
 
 def get_disk_status():
     """
@@ -74,24 +90,29 @@ def get_disk_status():
         None
 
     Returns:
-        str: Human-readable disk usage message.
+        str: Human-readable disk usage message or error message on failure.
     """
 
     # Disk statistics are currently limited to Windows
     if not sys.platform.startswith("win"):
-            return "Disk statistics is only supported on Windows."
+        logger.warning("Disk statistics requested on unsupported platform | platform=%s", sys.platform)
+        return "Disk statistics is only supported on Windows"
 
-    drive="C:\\"
+    drive = "C:\\"
 
     try:
         usage = psutil.disk_usage(drive)
     except Exception:
-        return "I could not access disk information."
+        logger.exception("Failed to access disk information")
+        return "Could not access disk information"
     
     total = usage.total / (1024 ** 3)
     available = usage.free / (1024 ** 3)
 
-    return f"Drive C has {available:.1f} GB of free space out of a total {total:.1f} GB."
+    result = f"Drive C has {available:.1f} GB of free space out of a total {total:.1f} GB"
+
+    logger.debug("Disk status generated | drive=%s total_gb=%.1f free_gb=%.1f", drive, total, available)
+    return result
 
 def get_uptime():
     """
@@ -101,21 +122,25 @@ def get_uptime():
         None
 
     Returns:
-        str: Human-readable system uptime message.
+        str: Human-readable system uptime message or error message on failure.
     """
     try:
         boot_time = psutil.boot_time()
     except Exception:
-        return "I could not retrieve system uptime."
+        logger.exception("Failed to retrieve system uptime")
+        return "Could not retrieve system uptime"
     
     uptime_seconds = int(time.time() - boot_time)
     hours = uptime_seconds // 3600
     minutes = (uptime_seconds % 3600) // 60
 
     if hours == 0:
-        return f"The system has been running for {minutes} minutes."
+        result = f"The system has been running for {minutes} minutes"
+    else:
+        result = f"The system has been running for {hours} hours and {minutes} minutes"
 
-    return f"The system has been running for {hours} hours and {minutes} minutes."
+    logger.debug("Uptime generated | hours=%s minutes=%s", hours, minutes)
+    return result
 
 SYSTEM_INFO_HANDLERS = {
     "battery": get_battery_status,
@@ -133,26 +158,36 @@ def handle_system_info(payload):
         payload (dict): Intent entities containing the requested resource.
 
     Returns:
-        str: Result returned by the matched system information handler.
+        str: Result returned by the matched system information handler or error message on failure.
     """
+    logger.debug("Payload received: %s", payload)
+
     target_resource = payload.get("resource")
 
     # Resource key is required to determine handler
     if not target_resource:
-        return "No resource was queried."
+        logger.warning("System info requested without resource")
+        return "No resource was queried"
     
     target_resource = target_resource.strip().lower()
     handler = SYSTEM_INFO_HANDLERS.get(target_resource)
 
     # Unsupported resources are rejected explicitly
     if not handler:
-        return "This system information is not supported yet."
+        logger.warning("Unsupported system info requested | resource=%s", target_resource)
+        return "This system information is not supported yet"
     
-    return handler()
+    logger.debug("System info handler selected | handler=%s", handler.__name__)
+    result = handler()
+    logger.debug("System info response generated | resource=%s", target_resource)
+    return result
 
 
 if __name__ == "__main__":
+    from core.logger_config import setup_logging
+
+    setup_logging()
+
     request_resource = input("Enter resource ('battery' or 'cpu' or 'memory' or 'storage' or 'uptime'): ")
     payload = {"resource": request_resource}
-    response = handle_system_info(payload)
-    print(response)
+    handle_system_info(payload)
