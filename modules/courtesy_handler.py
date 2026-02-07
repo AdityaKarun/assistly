@@ -5,9 +5,9 @@ logger = logging.getLogger(__name__)
 
 # Predefined short acknowledgements for courtesy-style responses
 RESPONSES = [
-    "You're welcome.",
-    "No problem.",
-    "Anytime."
+    "You're welcome",
+    "No problem",
+    "Anytime"
 ]
 
 def handle_courtesy():
