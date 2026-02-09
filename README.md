@@ -1,10 +1,10 @@
-# "Assistly: Voice Assistant with LLM-Driven Intent Routing
+# Assistly: Voice Assistant with LLM-Driven Intent Routing
 
-**Assistly** is a comprehensive, modular Python-based voice assistant framework that enables users to interact with their system through natural voice commands. It combines advanced intent classification, speech recognition and synthesis, and LLM integration (Google Gemini) to provide an extensible set of capabilities and skills.
+**Assistly** is a comprehensive, modular Python-based voice assistant that enables users to interact with their system through natural voice commands. It combines advanced intent classification, speech recognition and synthesis, and LLM integration (Google Gemini) to provide an extensible set of capabilities and skills.
 
 ---
 
-## 📋 Table of Contents
+## 📖 Table of Contents
 
 - [Features](#features)
 - [Architecture Overview](#architecture-overview)
@@ -20,8 +20,6 @@
 
 ## ✨ Features
 
-**Assistly** is designed as a lightweight yet powerful voice-driven automation framework for personal computers and edge devices. It leverages advanced natural language processing through Google Gemini API to understand user intent from voice commands, making complex system interactions accessible through natural speech.
-
 - **Voice Input/Output**: Continuous speech recognition and natural text-to-speech responses using Google Cloud Speech API and pyttsx3
 - **AI-Powered Intent Classification**: Uses Google Gemini LLM to intelligently parse natural language commands with entity extraction and confidence scoring
 - **Entity Extraction**: Automatically identifies and extracts relevant parameters (locations, search terms, durations, etc.) from user commands for precise action execution
@@ -32,7 +30,7 @@
 - **Comprehensive Logging**: Debug-ready logging with dual output (console for INFO+ events, files for DEBUG+ events) for troubleshooting and monitoring
 - **Graceful Error Handling**: Fallback responses and exception handling ensure the assistant remains responsive even when external APIs are unavailable
 - **Event-Driven Pipeline**: Speech is captured, processed through a multi-stage pipeline, and results are routed to appropriate modules
-- **Extensible Design**: Add new skills by creating simple Python modules without modifying core framework code
+- **Extensible Design**: Add new skills by creating simple Python modules without modifying core application code
 - **API-First Approach**: Integrates with third-party services (WeatherAPI, NewsAPI, YouTube, Google Search) while maintaining modularity
 - **Configurable via Environment**: All API keys and settings managed through `.env` files for easy deployment across environments
 - **Cross-Platform**: Works on Windows, macOS, and Linux with the same codebase
@@ -77,7 +75,7 @@ User Audio Output
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/AdityaKarun/assistly
+git clone https://github.com/AdityaKarun/assistly.git
 cd assistly
 ```
 
@@ -148,7 +146,7 @@ NEWS_API_KEY=your_newsapi_key_here
 
 ---
 
-## � Usage
+## 🚀 Usage
 
 ### Basic Startup
 ```bash
@@ -159,31 +157,32 @@ The assistant will greet you, listen for voice commands, classify the intent usi
 
 ---
 
-## �📁 Project Structure
+## 📂 Project Structure
 
 ```
 assistly/
-├── core/                        # Core framework components
-│   ├── intent_classifier.py     # AI intent classification using Google Gemini
-│   ├── llm_client.py            # Google Gemini API client
-│   ├── logger_config.py         # Logging configuration
-│   ├── recognizer.py            # Speech-to-text recognition module
-│   ├── router.py                # Intent routing and module dispatcher
-│   └── speech.py                # Text-to-speech synthesis module
+├── core/                        # Core application components
+│   ├── intent_classifier.py
+│   ├── llm_client.py
+│   ├── logger_config.py
+│   ├── recognizer.py
+│   ├── router.py
+│   └── speech.py
 ├── logs/                        # Application logs directory
 ├── modules/                     # Individual skill modules
-│   ├── courtesy_handler.py      # Polite responses handler
-│   ├── date_and_time.py         # Current date and time provider
-│   ├── greet.py                 # Time-based greeting generator
-│   ├── joke.py                  # Programming jokes provider
-│   ├── location.py              # Location/IP geolocation resolver
-│   ├── news.py                  # News headlines fetcher
-│   ├── open_app_or_url.py       # Application and URL launcher
-│   ├── search_google.py         # Google search functionality
-│   ├── system_info.py           # System information provider
-│   ├── timer.py                 # Countdown timer functionality
-│   ├── weather.py               # Weather information retrieval
-│   └── youtube_player.py        # YouTube video player
+│   ├── courtesy_handler.py
+│   ├── date_and_time.py
+│   ├── greet.py
+│   ├── joke.py
+│   ├── location.py
+│   ├── news.py
+│   ├── open_app_or_url.py
+│   ├── search_google.py
+│   ├── system_info.py
+│   ├── timer.py
+│   ├── weather.py
+│   └── youtube_player.py
+├── .gitignore                   # Git ignore rules
 ├── LICENSE                      # Project license
 ├── README.md                    # Project documentation
 ├── main.py                      # Application entry point and main loop
@@ -208,16 +207,16 @@ assistly/
 |--------|------|-------------|-------------------|
 | **Greeter** | `greet.py` | Time-based greeting (Good Morning/Afternoon/Evening) | - |
 | **Date/Time** | `date_and_time.py` | Current date, time, and day information | "What time is it?", "Tell me the date", "What's today?" |
-| **Weather** | `weather.py` | Real-time weather using WeatherAPI.com | "What's the weather in London?", "Will it rain?", "Temperature in Paris" |
+| **Weather** | `weather.py` | Real-time weather using WeatherAPI.com | "What's the weather in London?", "How is the weather?", "How is the sky in Paris" |
 | **News** | `news.py` | Latest headlines from BBC News | "What's happening in news?", "Tell me today's headlines", "Any news updates?" |
 | **Jokes** | `joke.py` | Random programming jokes via PyJokes | "Tell me a joke", "Make me laugh", "Say something funny" |
 | **Location** | `location.py` | IP-based geolocation detection | "Where am I?", "What's my location?" |
 | **Google Search** | `search_google.py` | Internet search capability | "Search for Python tutorials", "Google machine learning", "Look up quantum physics" |
-| **YouTube Player** | `youtube_player.py` | YouTube video search and playback | "Play despacito on YouTube", "Search songs on YouTube", "Open YouTube" |
+| **YouTube Player** | `youtube_player.py` | YouTube video search and playback | "Play despacito on YouTube", "Play the odyssey trailer" |
 | **App/URL Launcher** | `open_app_or_url.py` | Open applications and websites | "Open notepad", "Launch Chrome", "Visit google.com" |
-| **System Info** | `system_info.py` | CPU, memory, and disk usage information | "What's my system info?", "CPU usage", "Show memory details" |
+| **System Info** | `system_info.py` | CPU, memory, and disk usage information | "How much space do i have left?", "CPU usage", "Show memory details" |
 | **Timer** | `timer.py` | Countdown timer with audio alerts | "Set a timer for 5 minutes", "Timer 30 seconds", "Countdown 2 minutes" |
-| **Courtesy Handler** | `courtesy_handler.py` | Polite responses for thank you, sorry, etc. | "Thank you", "Thanks for your help", "Sorry" |
+| **Courtesy Handler** | `courtesy_handler.py` | Polite responses for thank you, appreciation, etc. | "Thank you", "Thanks for your help", "Appreciate it" |
 
 ---
 
@@ -227,4 +226,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ by Aditya Karun**
+<p style="text-align:center; font-weight: bold;">Made with ❤️ by Aditya Karun</p>
