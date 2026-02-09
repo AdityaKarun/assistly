@@ -226,4 +226,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<p style="text-align:center; font-weight: bold;">Made with ❤️ by Aditya Karun</p>
+<div align="center">Made with ❤️ by Aditya Karun</div>
