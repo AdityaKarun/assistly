@@ -1,4 +1,4 @@
-# Assistly - Voice Assistant Framework
+# "Assistly: Voice Assistant with LLM-Driven Intent Routing
 
 **Assistly** is a comprehensive, modular Python-based voice assistant framework that enables users to interact with their system through natural voice commands. It combines advanced intent classification, speech recognition and synthesis, and LLM integration (Google Gemini) to provide an extensible set of capabilities and skills.
 
@@ -227,4 +227,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<center>**Made with ❤️ by Aditya Karun**</center>
+**Made with ❤️ by Aditya Karun**
