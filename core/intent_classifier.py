@@ -95,7 +95,7 @@ class IntentEngine:
             Examples: "search for python tutorials", "look up quantum physics", "google elon musk"
 
             7. "youtube" - User wants to play, search, or open something on YouTube
-            Examples: "play despacito", "open youtube", "search songs on youtube"
+            Examples: "play despacito", "play the odyssey trailer", "search songs on youtube"
 
             8. "opening_app_or_url" - User wants to open an application or website
             
